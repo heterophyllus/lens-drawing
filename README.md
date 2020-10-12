@@ -8,7 +8,7 @@ This python program plots an aspherical curve and draws a lens shape.
 ## Usage
 
 ### 1. Using the module
-Each of the modules can be used in any codes like the following example.
+Each of the modules works by itself in any codes like the following example.
 
 ```python
 # single surface plot
@@ -33,7 +33,7 @@ plt.plot(h,s.sag(h))
 ```
 
 ### 2. GUI application
-The GUI application is available by running the below in the directory. The executable is also distributed on the [Release page](https://github.com/heterophyllus/lens-drawing/releases/latest).
+The GUI application is available by running the below in the directory. The executable is also distributed in the [Release page](https://github.com/heterophyllus/lens-drawing/releases/latest).
 ```
 python drawing-gui.py
 ```
