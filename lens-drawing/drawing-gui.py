@@ -528,7 +528,7 @@ class Window(QtWidgets.QMainWindow):
 		"GNU General Public License for more details.\n"
 		"\n"
 		"You should have received a copy of the GNU General Public License "
-		"along with this program.  If not, see <http://www.gnu.org/licenses/>."
+		"along with this program.  If not, see <http://www.gnu.org/licenses/>.\n"
 		"\n"
 		"You can get the further information from the repository:\n" 
 		"https://github.com/heterophyllus/lens-drawing")
@@ -605,6 +605,7 @@ class Window(QtWidgets.QMainWindow):
 if __name__ == '__main__':
 	app = QtWidgets.QApplication(sys.argv)
 	w = Window()
+	w.resize(5,5)
 	w.show()
 	sys.exit(app.exec_())
 

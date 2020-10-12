@@ -44,6 +44,10 @@ class Surface:
     def local_radius(self, h):
         pass
 
+    def print_data(self,h):
+        for hh in h:
+            print('{0:.4f} {1:.4f} {2:.4f} {3:.4f}'.format(hh, self.sag(hh), self.slope(hh), self.local_radius(hh)))
+
 
 
 class Sphere(Surface):
@@ -83,6 +87,9 @@ class Sphere(Surface):
 
     def slope(self,h):
         return (np.arctan(self.deriv_1st(h)))*180/np.pi
+
+    def local_curvature(self,h):
+        return 1/self.local_radius(h)
 
     def local_radius(self,h):
         return self.r + np.zeros_like(h)
@@ -164,7 +171,7 @@ class EvenAsphere(Surface):
             pass
 
         return lr
-
+    
 
 class OddAsphere(Surface):
     def __init__(self, r=np.inf, k=0.0, coefs=None, inner_d=0.0, outer_d=0.0):
