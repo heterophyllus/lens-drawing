@@ -45,6 +45,7 @@ class Surface:
         pass
 
     def print_data(self,h):
+        print('{:>5}'.format('h'), '{:>5}'.format('sag'), '{:>5}'.format('slope'),'{:>5}'.format('localR'))
         for hh in h:
             print('{0:.4f} {1:.4f} {2:.4f} {3:.4f}'.format(hh, self.sag(hh), self.slope(hh), self.local_radius(hh)))
 

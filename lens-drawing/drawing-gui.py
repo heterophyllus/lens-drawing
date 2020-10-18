@@ -54,7 +54,7 @@ class Window(QtWidgets.QMainWindow):
 		self.initializeCoefTable('left')
 		self.initializeCoefTable('right')
 
-		# lens
+		# lens list
 		self.lens_list = []
 
 		# inputs
@@ -90,6 +90,15 @@ class Window(QtWidgets.QMainWindow):
 
 		try:
 			self.ui.listWidget_Lens.currentRowChanged.connect(self.changeLens)
+		except ConnectionError:
+			pass
+
+		try: 
+			self.ui.comboBox_R1_Type.currentIndexChanged.connect(lambda : self.changeSurfaceType('left'))
+		except ConnectionError:
+			pass
+		try: 
+			self.ui.comboBox_R2_Type.currentIndexChanged.connect(lambda : self.changeSurfaceType('right'))
 		except ConnectionError:
 			pass
 
@@ -137,6 +146,15 @@ class Window(QtWidgets.QMainWindow):
 			pass
 
 		try:
+			self.ui.comboBox_R1_Type.currentIndexChanged.disconnect()
+		except:
+			pass
+		try:
+			self.ui.comboBox_R2_Type.currentIndexChanged.disconnect()
+		except:
+			pass
+		
+		try:
 			self.ui.tableWidget_R1_Coefs.cellChanged.disconnect()
 		except:
 			pass
@@ -180,15 +198,14 @@ class Window(QtWidgets.QMainWindow):
 			return self.ui.lineEdit_R2_Diameter_Outer, self.ui.lineEdit_R2_Diameter_Inner, self.ui.comboBox_R2_Type, self.ui.tableWidget_R2_Coefs, self.ui.tableWidget_R2_Data
 
 
-	def initializeCoefTable(self, which_surf='left', surf_type_index=None):
+	def initializeCoefTable(self, which_surf= 'left'):
 		""" 
 		initialize coefficients table
 		"""
-
+		
 		_, _, combo, coef_table, _ = self.getUiObjects(which_surf)
 		
-		if surf_type_index is None:
-			surf_type_index = int(combo.currentIndex())
+		surf_type_index = int(combo.currentIndex())
 
 		# horizontal header
 		coef_table.clear()
@@ -196,6 +213,7 @@ class Window(QtWidgets.QMainWindow):
 		coef_table.setHorizontalHeaderLabels(['Value'])
 		
 		# vertical header
+		header_labels = []
 		if surf_type_index == 0: # sphere
 			coef_table.setRowCount(1)
 			header_labels = ['Radius']
@@ -209,6 +227,16 @@ class Window(QtWidgets.QMainWindow):
 			coef_table.setItem(1,0, QtWidgets.QTableWidgetItem('0.0'))
 			for i in range(2,10+1):
 				header_labels.append('A' + str(i*2))
+				coef_table.setItem(i,0, QtWidgets.QTableWidgetItem('0.0'))
+
+		elif surf_type_index == 2: # odd asphere
+			coef_table.setRowCount(1 + 1 + 17) # R, k, A4-A20
+			header_labels = ['Radius']
+			coef_table.setItem(0,0, QtWidgets.QTableWidgetItem('Inf'))
+			header_labels.append('k')
+			coef_table.setItem(1,0, QtWidgets.QTableWidgetItem('0.0'))
+			for i in range(2,21+1):
+				header_labels.append('A' + str(i+1))
 				coef_table.setItem(i,0, QtWidgets.QTableWidgetItem('0.0'))
 		
 		coef_table.setVerticalHeaderLabels(header_labels)
@@ -271,42 +299,56 @@ class Window(QtWidgets.QMainWindow):
 
 	def getSurfaceFromUI(self, which_surf='left'):
 
-		# left surafce
 		edit_outer, edit_inner, combo, coef_table, _ = self.getUiObjects(which_surf)
 
 		type_index = combo.currentIndex()
+		
 		if type_index == 0: # sphere
 			surf = s.Sphere()
-			r_text = coef_table.item(0,0).text()
+			r = 0.0
 			try:
-				r = float(r_text)
+				r = float(coef_table.item(0,0).text())
+			except AttributeError:
+				pass
 			except ValueError:
 				r = np.inf
 			else:
-				if r == 0.0:
-					r = np.inf
+				r = 0.0
+
 			surf.r = r
 
-		elif type_index == 1: # even asphere
-			r_text = coef_table.item(0,0).text()
+		else:
 			try:
-				r = float(r_text)
+				r = float(coef_table.item(0,0).text())
+			except AttributeError:
+				pass
 			except ValueError:
 				r = np.inf
 			else:
-				if r == 0.0:
-					r = np.inf
+				r == 0.0
 
-			k = float(coef_table.item(1,0).text())
+			try:
+				k = float(coef_table.item(1,0).text())
+			except AttributeError as e:
+				print(e)
+				k = 0.0
+				return
 
 			coefs = np.zeros(coef_table.rowCount()-2)
 			for i in range(2,coef_table.rowCount()):
 				try:
 					coefs[i-2]= float(coef_table.item(i,0).text())
-				except:
+				except AttributeError as e:
+					print(e)
+					coefs[i-2] = 0.0
+				except ValueError:
 					coefs[i-2] = 0.0
 
-			surf = s.EvenAsphere(r,k,coefs)
+			if type_index == 1:
+				surf = s.EvenAsphere(r,k,coefs)
+			else:
+				surf = s.OddAsphere(r,k,coefs)
+				
 		
 		# diameters
 		try:
@@ -334,16 +376,23 @@ class Window(QtWidgets.QMainWindow):
 			combo.setCurrentIndex(0)
 			self.disconnectAll()
 			self.initializeCoefTable(which_surf)
-			coef_table.item(0,0).setText(str(surf.r))
-		elif surf.type == 'ASP':
+			try:
+				coef_table.item(0,0).setText(str(surf.r))
+			except AttributeError:
+				pass
+		else:
 			combo.setCurrentIndex(1)
 			self.disconnectAll()
 			self.initializeCoefTable(which_surf)
 			r,k,coefs = surf.get_parameters()
-			coef_table.item(0,0).setText(str(r))
-			coef_table.item(1,0).setText(str(k))
-			for i,A in enumerate(coefs):
-				coef_table.item(i+2,0).setText(str(A))
+			try:
+				coef_table.item(0,0).setText(str(r))
+				coef_table.item(1,0).setText(str(k))
+				for i,A in enumerate(coefs):
+					coef_table.item(i+2,0).setText(str(A))
+			except AttributeError:
+				pass
+			
 
 		# diameters
 		edit_outer.setText(str(surf.outer_d))

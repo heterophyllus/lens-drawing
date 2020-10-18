@@ -47,12 +47,17 @@
         <widget class="QComboBox" name="comboBox_R2_Type">
          <item>
           <property name="text">
-           <string>Spherical</string>
+           <string>Sphere</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Aspherical</string>
+           <string>Even Asphere</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Odd Asphere</string>
           </property>
          </item>
         </widget>
@@ -221,12 +226,17 @@
          </property>
          <item>
           <property name="text">
-           <string>Spherical</string>
+           <string>Sphere</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Aspherical</string>
+           <string>Even Asphere</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Odd Asphere</string>
           </property>
          </item>
         </widget>
