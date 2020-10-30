@@ -413,6 +413,9 @@ class Window(QtWidgets.QMainWindow):
 		lens.left  = self.getSurfaceFromUI('left')
 		lens.right = self.getSurfaceFromUI('right')
 
+		# material
+		lens.material = self.ui.lineEdit_Glass.text()
+
 		# thickness
 		try:
 			lens.thickness = float(self.ui.lineEdit_Thickness.text())

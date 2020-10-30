@@ -55,6 +55,7 @@ class Lens:
     def to_dict(self):
         dct = {}
         dct['name'] = self.name
+        dct['material'] = self.material
         dct['thickness'] = self.thickness
         dct['description'] = self.description
 
@@ -89,6 +90,7 @@ class Lens:
             return
 
         self.name = dct['name']
+        self.material = dct['material']
         self.thickness = float(dct['thickness'])
         self.description = dct['description']
         
