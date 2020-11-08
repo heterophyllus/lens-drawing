@@ -31,14 +31,14 @@ import json
 
 
 class MplCanvas(FigureCanvas):
-	def __init__(self, parent=None, width=10, height=8, dpi=100):
+	def __init__(self, parent=None, width=10, height=10, dpi=100):
 		fig = Figure(dpi=dpi)
 		self.axes = fig.add_subplot(111)
 
 		FigureCanvas.__init__(self, fig)
 		self.setParent(parent)
 
-		#FigureCanvas.setSizePolicy(self,QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
+		FigureCanvas.setSizePolicy(self,QtWidgets.QSizePolicy.Fixed,QtWidgets.QSizePolicy.Fixed)
 		FigureCanvas.updateGeometry(self)
 
 
@@ -66,7 +66,7 @@ class Window(QtWidgets.QMainWindow):
 		
 		# draw area
 		self.l = QtWidgets.QVBoxLayout(self.ui.tab_Draw)
-		self.sc = MplCanvas(self.ui.tab_Draw, width=5, height=4, dpi=100)
+		self.sc = MplCanvas(self.ui.tab_Draw, width=5, height=5, dpi=100)
 		self.l.addWidget(self.sc)
 		self.l.addWidget(NavigationToolbar(self.sc,self))
 
@@ -305,27 +305,20 @@ class Window(QtWidgets.QMainWindow):
 		
 		if type_index == 0: # sphere
 			surf = s.Sphere()
-			r = 0.0
+			r = np.inf
 			try:
 				r = float(coef_table.item(0,0).text())
-			except AttributeError:
-				pass
 			except ValueError:
 				r = np.inf
-			else:
-				r = 0.0
 
 			surf.r = r
 
 		else:
+			r = np.inf
 			try:
 				r = float(coef_table.item(0,0).text())
-			except AttributeError:
-				pass
 			except ValueError:
 				r = np.inf
-			else:
-				r == 0.0
 
 			try:
 				k = float(coef_table.item(1,0).text())
@@ -462,7 +455,7 @@ class Window(QtWidgets.QMainWindow):
 			return
 
 		if lens.left.inner_d <= 0.0 or lens.right.inner_d <= 0.0:
-			print("Invalid diameter (<=0)")
+			#print("Invalid diameter (<=0)")
 			return
 		
 
@@ -470,13 +463,12 @@ class Window(QtWidgets.QMainWindow):
 		step = 0.25
 		color = 'b'
 
-
 		# --------------
 		# left surface
 		# --------------
 
 		# curve
-		h1 = np.arange(-lens.left.inner_d/2, lens.left.inner_d/2, step)
+		h1 = np.linspace(-lens.left.inner_d/2, lens.left.inner_d/2)
 		z1 = lens.left.sag(h1)
 		self.sc.axes.plot(z1, h1, color)
 
@@ -509,7 +501,7 @@ class Window(QtWidgets.QMainWindow):
 		# ---------------
 
 		# curve
-		h2 = np.arange(-lens.right.inner_d/2, lens.right.inner_d/2, step)
+		h2 = np.linspace(-lens.right.inner_d/2, lens.right.inner_d/2)
 		z2 = lens.right.sag(h2) + lens.thickness
 		self.sc.axes.plot(z2, h2, color)
 
@@ -543,15 +535,16 @@ class Window(QtWidgets.QMainWindow):
 		# -----
 		z3 = np.array([z1[0], z2[0]],dtype=float)
 		h3 = np.array([lens.left.outer_d/2, lens.right.outer_d/2],dtype=float)
-		self.sc.axes.plot(z3, h3,color)
-		self.sc.axes.plot(z3, -h3,color)
+		self.sc.axes.plot(z3, h3, color)
+		self.sc.axes.plot(z3, -h3, color)
 
 
 		# set axis scale
-		mergin = 1.0
-		al = np.maximum(lens.left.outer_d/2,lens.right.outer_d/2) + mergin
-		self.sc.axes.set_xlim([-al,al])
-		self.sc.axes.set_ylim([-al,al])
+		margin = 1.0
+		max_d = np.maximum(lens.left.outer_d/2,lens.right.outer_d/2)
+		axis_lim = np.maximum(max_d,lens.thickness) + margin
+		self.sc.axes.set_xlim([-axis_lim,axis_lim])
+		self.sc.axes.set_ylim([-axis_lim,axis_lim])
 
 		self.sc.draw()
 

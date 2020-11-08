@@ -22,9 +22,22 @@
 import numpy as np
 
 class Surface:
-    def __init__(self, inner_d=0.0, outer_d=0.0):
+    def __init__(self, r=np.inf, inner_d=0.0, outer_d=0.0):
         self.inner_d = inner_d
         self.outer_d = outer_d
+        self.r = r
+
+    @property
+    def c(self):
+        # center radius
+        if self.r == np.inf:
+            _c = 0.0
+        else:
+            try:
+                _c = 1/self.r
+            except ZeroDivisionError:
+                _c = np.inf
+        return _c
 
     def sag(self,h):
         pass
@@ -52,23 +65,10 @@ class Surface:
 
 
 class Sphere(Surface):
-    def __init__(self, r=np.inf,inner_d=0.0, outer_d=0.0):
+    def __init__(self, r=np.inf, inner_d=0.0, outer_d=0.0):
         super().__init__(inner_d, outer_d)
         self.type = 'SPH'
         self.r = r
-        
-    @property
-    def c(self):
-        # center radius
-        if self.r == np.inf:
-            _c = 0.0
-        else:
-            try:
-                _c = 1/self.r
-            except ZeroDivisionError:
-                _c = np.inf
-        
-        return _c
 
     def sag(self, h):
         z = self.c* h**2 / ( 1 + np.sqrt(1 - self.c**2 * h**2) )
@@ -108,14 +108,6 @@ class EvenAsphere(Surface):
             self.coefs = np.zeros(9,dtype=float)
         else:
             self.coefs = coefs
-
-    @property
-    def c(self):
-        try:
-            _c = 1/self.r
-        except ZeroDivisionError:
-            _c = np.inf
-        return _c
 
     def get_parameters(self):
         return self.r, self.k, self.coefs
@@ -186,14 +178,6 @@ class OddAsphere(Surface):
             self.coefs = np.zeros(9,dtype=float)
         else:
             self.coefs = coefs
-
-    @property
-    def c(self):
-        try:
-            _c = 1/self.r
-        except ZeroDivisionError:
-            _c = np.inf
-        return _c
     
     def sag(self, h):
         z_conic = self.c*np.power(h,2.0) /(1.0 + np.sqrt(1-(1+self.k)*np.power(self.c,2.0)*np.power(h,2.0)))
