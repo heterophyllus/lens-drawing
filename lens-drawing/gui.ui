@@ -80,7 +80,7 @@
         </widget>
        </item>
        <item row="0" column="3">
-        <widget class="QLineEdit" name="lineEdit_Glass">
+        <widget class="QLineEdit" name="lineEdit_Material">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -98,7 +98,7 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Glass: </string>
+          <string>Material: </string>
          </property>
         </widget>
        </item>

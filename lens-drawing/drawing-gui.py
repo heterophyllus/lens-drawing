@@ -34,6 +34,7 @@ class MplCanvas(FigureCanvas):
 	def __init__(self, parent=None, width=10, height=10, dpi=100):
 		fig = Figure(dpi=dpi)
 		self.axes = fig.add_subplot(111)
+		self.axes.set_aspect('equal')
 
 		FigureCanvas.__init__(self, fig)
 		self.setParent(parent)
@@ -407,7 +408,7 @@ class Window(QtWidgets.QMainWindow):
 		lens.right = self.getSurfaceFromUI('right')
 
 		# material
-		lens.material = self.ui.lineEdit_Glass.text()
+		lens.material = self.ui.lineEdit_Material.text()
 
 		# thickness
 		try:
@@ -428,7 +429,7 @@ class Window(QtWidgets.QMainWindow):
 		self.setSurfaceToUI(lens.right,'right')
 
 		self.disconnectAll()
-		self.ui.lineEdit_Glass.setText(lens.material)
+		self.ui.lineEdit_Material.setText(lens.material)
 		self.ui.lineEdit_Thickness.setText(str(lens.thickness))
 		self.ui.textEdit_Description.setPlainText(lens.description)
 		self.connectAll()
