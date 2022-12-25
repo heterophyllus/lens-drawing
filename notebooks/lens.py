@@ -1,47 +1,38 @@
 import numpy as np
 
 class Surface:
-    def __init__(self, r, cd, ed = None):
-        self.radius = r
-        self.clear_diameter = cd
+    def __init__(self, radius:float, clear_diameter:float):
+        self.radius:float = radius
+        self.clear_diameter:float = clear_diameter
         
-        if ed is None:
-            self.edge_diameter = cd
-        else:
-            self.edge_diameter = ed
-
-    def __repr__(self) -> str:
-        return str({"R": self.radius, "clear_diameter":self.clear_diameter, "edge_diameter":self.edge_diameter})
-
-    def sag(self, h) -> float:
+    def sag(self, h:float) -> float:
         r = self.radius
         adj = np.sqrt(r*r - h*h)
         return r*(1-np.abs(adj/r))
 
     @property
     def curvature(self) -> float:
-        if self.radius == 0.0:
+        if abs(self.radius) < 1e-6:
             return 0.0
         else:
-            return 1/self.radius
+            return 1.0/self.radius
+
 
 class Singlet:
-    def __init__(self, r1, cd1, ed1, r2, cd2, ed2, m, t):
-        self.left_surface  = Surface(r1, cd1, ed1)
-        self.right_surface = Surface(r2, cd2, ed2)
-        self.material = "N-BK7"
-        self.thickness = t
+    def __init__(self, radius1:float, clear_diameter1:float, radius2:float, clear_diameter2:float, mech_diameter:float, material:str, thickness:float):
+        self.left_surface  = Surface(radius1, clear_diameter1)
+        self.right_surface = Surface(radius2, clear_diameter2)
+        self.mech_diameter = mech_diameter
+        self.material      = material
+        self.thickness     = thickness
 
-    @property
-    def mech_diameter(self) -> float:
-        return max(self.left_surface.edge_diameter, self.right_surface.edge_diameter)
+        self.tolerances = {
+            "thickness":(-0.05, 0.05),
+            "koba":(-0.05, 0.05),
+            "mech_diameter":(-0.08, -0.03),
+        }
 
-    def power(self) -> float:
-        n = 1.5
-        t = self.thickness
-        cv1 = self.left_surface.curvature
-        cv2 = self.right_surface.curvature
-        return (n-1)*(cv1-cv2 + t*(n-1)*cv1*cv2/n)
-    
-    def focal_length(self) -> float:
-        return 1/self.power()
+    def set_tolerance(self, tolerance_name, tolerance_range):
+        if tolerance_name in self.tolerances.keys:
+            self.tolerances[tolerance_name] = tolerance_range
+
